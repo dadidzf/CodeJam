@@ -2,6 +2,10 @@
     
     isSquare() {
         var len = this.m_linkedGridArr.length
+        if (len % 4 !== 0){
+            return false
+        }
+        
         var step = len / 4
         var curStep = 0
         var dirArr = []
