@@ -1,0 +1,64 @@
+    // 一些接口使用了CocosCreator 引擎的API, 但不影响代码理解
+    
+    isSquare() {
+        var len = this.m_linkedGridArr.length
+        var step = len / 4
+        var curStep = 0
+        var dirArr = []
+        var preGrid = this.m_linkedGridArr[0]
+
+        for (var i = 1; i <= len; i++) {
+            var curGrid = this.m_linkedGridArr[i % len]
+            var dir = cc.v2(curGrid.getDisplayedWIndex() - preGrid.getDisplayedWIndex(),
+                curGrid.getDisplayedHIndex() - preGrid.getDisplayedHIndex())
+
+            if (dir.mag() !== 1) { // 相邻两个点长度必须为1
+                return false
+            }
+
+            if (dirArr.length === 0) { // 第一个点的走向
+                dirArr.push(dir)
+                curStep++
+            }
+            else {
+                var curDir = dirArr[dirArr.length - 1]
+                if (curDir.equals(dir)) { // 下个点点的走向与当前方向相同
+                    if (curStep < step) { // 小于一条边的步数
+                        curStep++
+                    }
+                    else { // 当前走的步数超过了一条边应有的步数
+                        return false
+                    }
+                }
+                else { // 变向了
+                    //正好走完一条边, 同时要考虑从第一个点点开始走的情况
+                    if (curStep >= step || dirArr.length === 1) {
+                        dirArr.push(dir)
+                        curStep = 1
+                    }
+                    else { // 一条边都没走完就变向了
+                        return false
+                    }
+                }
+            }
+
+            preGrid = curGrid
+        }
+
+        if (dirArr.length > 5 || dirArr.length < 4) {
+            cc.error("Impossible ! must have logic error !")
+        }
+
+        // 第一条边的方向必然与第三条边的方向相反, 第二条与第四条边同理
+        if (!dirArr[0].equals(dirArr[2].neg()) || !(dirArr[1].equals(dirArr[3].neg()))) {
+            return false
+        }
+
+        // 如果有五个方向，必然是因为第一条边是从中间走起的，方向必然与第一条边的方向相同
+        if (dirArr.length === 5 && !(dirArr[0].equals(dirArr[4]))) {
+            return false
+        }
+
+        cc.log("SPKernelOperateMgr isSquare is square")
+        return true
+    },
