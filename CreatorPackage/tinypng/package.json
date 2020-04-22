@@ -1,0 +1,18 @@
+{
+    "name": "hook-after-build",
+    "version": "0.0.1",
+    "description": "构建后的处理",
+    "author": "HeroFightDzf",
+    "main": "main.js",
+    "main-menu": {
+        "Packages/ShrinkAllMode(defalut)": {
+            "message": "hook-after-build:shrinkAllMode"
+        },
+        "Packages/ReplaceMode": {
+            "message": "hook-after-build:replaceMode"
+        },
+        "Packages/TTMode": {
+            "message": "hook-after-build:ttMode"
+        }
+    }
+}
