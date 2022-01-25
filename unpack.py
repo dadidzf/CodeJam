@@ -29,15 +29,26 @@ def gen_png_from_plist(plist_filename, png_filename):
     if not 'frames' in plist_dict:
         return
     for k,v in plist_dict['frames'].items():
+        print ("------------------------- 图片名字", k)
         if 'textureRect' in v:
             rectlist = to_list(v['textureRect'])
         elif 'frame' in v:
             rectlist = to_list(v['frame'])
-        if 'rotated' in v:
+
+        if ('rotated' in v):
+            isRotated = v['rotated']  
             if isinstance(v['rotated'], str):
-                v['rotated'] = v['rotated'] == "true"
-            width = int( rectlist[3] if v['rotated'] else rectlist[2] )
-            height = int( rectlist[2] if v['rotated'] else rectlist[3] )        
+                isRotated = v['rotated'] == "true"
+
+            width = int( rectlist[3] if isRotated else rectlist[2] )
+            height = int( rectlist[2] if isRotated else rectlist[3] )        
+        elif ('textureRotated' in v):
+            isRotated = v['textureRotated']  
+            if isinstance(v['textureRotated'], str):
+                isRotated = v['textureRotated'] == "true"
+
+            width = int( rectlist[3] if isRotated else rectlist[2] )
+            height = int( rectlist[2] if isRotated else rectlist[3] )
         else:
             width = int( rectlist[2] )
             height = int( rectlist[3] )
@@ -79,6 +90,7 @@ def gen_png_from_plist(plist_filename, png_filename):
                 int(( sizelist[1] + height )/2)
                 )
 
+        print(rect_on_big, result_box)
         result_image.paste(rect_on_big, result_box, mask=0)
 
         if not os.path.isdir(file_path):
