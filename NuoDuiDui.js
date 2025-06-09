@@ -1,12 +1,12 @@
-let ROW = 8; // 行数
-let COL = 6; // 列数
-let FILE_NAME = "esay"
-let INIT_MIN_PAIR = 3; // 初始数组最少多少个队子 
-let INIT_MAX_PAIR = 8; // 初始数组最多允许多少个对子
+let ROW = 10; // 行数
+let COL = 8; // 列数
+let FILE_NAME = "medium"
+let INIT_MIN_PAIR = 5; // 初始数组最少多少个队子 
+let INIT_MAX_PAIR = 12; // 初始数组最多允许多少个对子
 let MAX_PLAY_TIMES = 1000; // 一个数组最多测试多少次
 
-let FIND_ANSWER_LOG_MUTE = true;
 
+let FIND_ANSWER_LOG_MUTE = true;
 // 查找答案算法，打印函数，方便屏蔽
 let findAnswerLog = function (...args) {
     if (!FIND_ANSWER_LOG_MUTE) {
@@ -425,8 +425,8 @@ let applyAnswer = function (boardArr, start, dest, dir, mahjongCnt) {
 }
 
 let tempArrIndex = 0;
-let playOneArr = function () {
-    let boardArr = generateMahjongArr();
+let playOneArr = function (arr) {
+    let boardArr = arr || generateMahjongArr();
     //let boardArr = TEMPLATE_6x8_ARR[tempArrIndex++];
     arr = convertTo2D(boardArr, COL);
     let answerInfo = findAnswers(arr, ROW, COL, FIND_ALL_PAIR, false);
@@ -493,27 +493,41 @@ let playOneArr = function () {
 
 const fs = require('fs')
 
-let goodArr = {};
-let fullCntMap = {};
-let tryTimes = 0;
-while (1) {
-    tryTimes++;
-    let arrInfo = playOneArr();
-    if (arrInfo) {
-        let num = Math.floor(arrInfo.rate * 10) + 1;
-        if (!goodArr[num]) {
-            goodArr[num] = [];
-        }
-        if (goodArr[num].length < 10) {
-            goodArr[num].push(arrInfo);
-        }
-        else {
-            fullCntMap[num] = true;
-            if ((Object.keys(fullCntMap).length >= 10) || (tryTimes >= 500)) {
-                console.log("全部已经炼完!, tryTimes", tryTimes)
-                fs.writeFileSync(`MahjongConfig/${FILE_NAME}.json`, JSON.stringify(goodArr), 'utf8');
-                break;
+let generatePlayDatas = function () {
+    let goodArr = {};
+    let fullCntMap = {};
+    let tryTimes = 0;
+    while (1) {
+        tryTimes++;
+        let arrInfo = playOneArr();
+        if (arrInfo) {
+            let num = Math.floor(arrInfo.rate * 10) + 1;
+            if (!goodArr[num]) {
+                goodArr[num] = [];
+            }
+            if (goodArr[num].length < 10) {
+                goodArr[num].push(arrInfo);
+            }
+            else {
+                fullCntMap[num] = true;
+                if ((Object.keys(fullCntMap).length >= 10) || (tryTimes >= 500)) {
+                    console.log("全部已经炼完!, tryTimes", tryTimes)
+                    fs.writeFileSync(`MahjongConfig/${FILE_NAME}.json`, JSON.stringify(goodArr), 'utf8');
+                    break;
+                }
             }
         }
     }
 }
+
+let testOneArr = function () {
+    let arr = [
+        14, 3, 12, 1, 16, 4, 5, 8, 16, 14, 5, 4, 8, 12, 7, 10, 10, 15, 3, 9, 6, 20, 16, 19, 6, 17, 13, 1, 11, 7, 19, 18, 1, 4, 16, 5, 18, 8, 14, 15, 15, 12, 18, 18, 5, 9, 10, 2, 13, 12, 15, 20, 14, 6, 2, 13, 9, 11, 4, 11, 2, 17, 20, 3, 9, 13, 19, 10, 2, 11, 7, 6, 1, 3, 19, 8, 7, 17, 20, 17
+    ]
+    let arrInfo = playOneArr(arr);
+    console.log("测试一个数组的结果", arrInfo);
+}
+
+testOneArr();
+
+//generatePlayDatas();
