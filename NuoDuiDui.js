@@ -2,9 +2,9 @@ let MAX_PLAY_TIMES = 1000; // 一个数组最多测试多少次
 
 let LEVEL_MAP_CONFIGS = [
     // 行     列      文件名         开局最少对子数      开局最多对子数      起始过关率            每个难度过关率步进  每个难度关卡数    难度级别总数
-    { row: 8, col: 6, file: "easy", init_min_pairs: 2, init_max_pairs: 8, win_rate_start: 100, win_rate_step: 5, step_levels: 2, diff_cnt: 10 },
-    { row: 10, col: 8, file: "medium", init_min_pairs: 2, init_max_pairs: 12, win_rate_start: 85, win_rate_step: 5, step_levels: 2, diff_cnt: 10 },
-    { row: 12, col: 10, file: "hard", init_min_pairs: 3, init_max_pairs: 16, win_rate_start: 70, win_rate_step: 5, step_levels: 2, diff_cnt: 10 },
+    { row: 8, col: 6, file: "easy", init_min_pairs: 2, init_max_pairs: 8, win_rate_start: 100, win_rate_step: 5, step_levels: 10, diff_cnt: 10 },
+    { row: 10, col: 8, file: "medium", init_min_pairs: 2, init_max_pairs: 12, win_rate_start: 90, win_rate_step: 5, step_levels: 10, diff_cnt: 10 },
+    { row: 12, col: 10, file: "hard", init_min_pairs: 3, init_max_pairs: 16, win_rate_start: 80, win_rate_step: 5, step_levels: 10, diff_cnt: 10 },
 ]
 
 
@@ -422,7 +422,7 @@ let playOneArr = function (arr, row, col, minPairs, maxPairs) {
         return;
     }
     else {
-        let answerInfo = findAnswers(arr, FIND_ALL_PAIR, true);
+        let answerInfo = findAnswers(boardArr, FIND_ALL_PAIR, true);
         let answers = answerInfo.answers;
         for (let answer of answers) {
             if (answer.dests.length > 1) {
@@ -593,12 +593,13 @@ let TEST_ARRS = [
             //[6, 3, 15, 9, 16, 17, 5, 19, 1, 4, 5, 7, 4, 15, 11, 6, 17, 20, 19, 11, 3, 8, 13, 6, 19, 12, 2, 11, 8, 14, 16, 11, 1, 17, 13, 10, 2, 12, 5, 14, 14, 14, 7, 20, 9, 18, 8, 17, 9, 7, 20, 10, 13, 15, 3, 3, 13, 16, 16, 8, 5, 4, 6, 19, 12, 1, 9, 20, 18, 4, 10, 7, 12, 2, 15, 10, 1, 2, 18, 18],// 3 0.803
             //[10, 1, 7, 9, 20, 3, 18, 10, 4, 3, 13, 6, 10, 15, 7, 19, 2, 2, 1, 15, 13, 8, 17, 17, 5, 20, 15, 3, 6, 9, 19, 1, 10, 11, 11, 12, 12, 16, 5, 5, 16, 3, 9, 14, 14, 2, 8, 7, 20, 6, 4, 8, 17, 18, 15, 18, 17, 16, 9, 13, 11, 13, 6, 5, 20, 12, 4, 19, 18, 11, 14, 4, 12, 16, 7, 19, 14, 8, 1, 2], //2 0.907
             //[17, 8, 18, 4, 2, 18, 15, 3, 4, 17, 16, 5, 14, 10, 7, 10, 11, 9, 1, 10, 5, 18, 14, 17, 14, 9, 11, 16, 1, 2, 12, 8, 19, 6, 16, 10, 1, 5, 7, 2, 11, 7, 13, 13, 8, 14, 19, 20, 2, 4, 20, 15, 18, 1, 17, 12, 6, 15, 15, 3, 11, 9, 20, 6, 8, 13, 3, 20, 12, 19, 5, 12, 19, 7, 13, 6, 4, 16, 3, 9], // 7 0.662
-            [5, 17, 15, 9, 15, 16, 10, 7, 4, 10, 8, 18, 3, 11, 20, 2, 6, 6, 1, 19, 20, 12, 18, 3, 17, 11, 11, 18, 5, 19, 17, 20, 7, 17, 16, 13, 2, 13, 1, 14, 5, 5, 10, 13, 12, 10, 3, 6, 16, 4, 9, 1, 12, 6, 3, 9, 14, 14, 1, 20, 4, 7, 2, 8, 8, 4, 12, 13, 14, 19, 7, 15, 15, 8, 16, 11, 19, 2, 18, 9] // 10 0.611
+            //[5, 17, 15, 9, 15, 16, 10, 7, 4, 10, 8, 18, 3, 11, 20, 2, 6, 6, 1, 19, 20, 12, 18, 3, 17, 11, 11, 18, 5, 19, 17, 20, 7, 17, 16, 13, 2, 13, 1, 14, 5, 5, 10, 13, 12, 10, 3, 6, 16, 4, 9, 1, 12, 6, 3, 9, 14, 14, 1, 20, 4, 7, 2, 8, 8, 4, 12, 13, 14, 19, 7, 15, 15, 8, 16, 11, 19, 2, 18, 9] // 10 0.611
         ]
     },
     {
         row: 8, col: 6, minPairs: 2, maxPairs: 8,
         arrs: [
+            // [8, 1, 1, 7, 3, 11, 12, 12, 9, 9, 7, 4, 3, 8, 12, 10, 6, 9, 4, 10, 4, 2, 11, 6, 7, 2, 3, 10, 4, 2, 11, 8, 7, 1, 8, 9, 1, 5, 3, 6, 5, 6, 12, 2, 11, 10, 5, 5], // 超过三个相连的错误数据
             // [8, 10, 8, 7, 6, 5, 9, 6, 4, 7, 3, 5, 8, 6, 2, 12, 4, 7, 10, 3, 10, 9, 11, 4, 10, 1, 9, 11, 12, 3, 11, 9, 12, 5, 1, 7, 3, 2, 11, 8, 1, 2, 1, 5, 6, 4, 2, 12], // 2 0.868
             // [5, 6, 12, 5, 4, 7, 7, 3, 11, 8, 4, 2, 10, 2, 8, 12, 3, 9, 12, 8, 2, 3, 6, 10, 5, 9, 11, 1, 5, 6, 4, 12, 10, 7, 8, 1, 10, 11, 3, 9, 9, 11, 6, 1, 2, 7, 1, 4], // 4  0.788
             // [1, 7, 8, 10, 6, 4, 2, 5, 11, 9, 4, 6, 12, 1, 6, 8, 5, 5, 9, 4, 2, 12, 1, 10, 10, 4, 1, 2, 7, 3, 3, 9, 11, 10, 12, 3, 11, 12, 6, 2, 8, 9, 7, 11, 5, 8, 7, 3], // 5 0.8
@@ -672,8 +673,8 @@ let testArrs = function () {
     }
 }
 
-testArrs();
+//testArrs();
 
-// for (let mapConfig of LEVEL_MAP_CONFIGS) {
-//     generatePlayDatas(mapConfig);
-// }
+for (let mapConfig of LEVEL_MAP_CONFIGS) {
+    generatePlayDatas(mapConfig);
+}
