@@ -486,7 +486,8 @@ let playOneArr = function (arr, row, col, minPairs, maxPairs) {
     }
 }
 
-const fs = require('fs')
+const fs = require('fs');
+const path = require('path');
 
 let generatePlayDatas = function (mapConfig) {
     let row = mapConfig.row;
@@ -543,7 +544,11 @@ let generatePlayDatas = function (mapConfig) {
                     }
                 }
                 console.log(file + "全部已经炼完!, tryTimes", tryTimes)
-                fs.writeFileSync(`MahjongConfig/${file}.json`, JSON.stringify(fileInfo), 'utf8');
+                let dirPath = path.join(__dirname, `MahjongConfig`);
+                if (!fs.existsSync(dirPath)) {
+                    fs.mkdirSync(dirPath); // 使用 { recursive: true } 创建多级目录
+                }
+                fs.writeFileSync(path.join(__dirname, `MahjongConfig/${file}.json`), JSON.stringify(fileInfo), 'utf8');
                 break;
             }
         }
