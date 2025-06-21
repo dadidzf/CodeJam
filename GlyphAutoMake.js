@@ -103,7 +103,7 @@ let generateBmfonts = function (dir) {
                             });
 
                             // 创建临时文件
-                            const tempDir = path.join(dir, 'temp');
+                            const tempDir = path.join(outputDir, 'temp');
                             if (!fs.existsSync(tempDir)) {
                                 fs.mkdirSync(tempDir);
                             }
@@ -178,7 +178,7 @@ let generateTTFs = function (dir) {
 
                             if (keysArray.length === 0) {
                                 // 将所有的 key 写入原 JSON 文件
-                                fs.writeFileSync(jsonFilePath, JSON.stringify(allKeys, null, 2), 'utf8');
+                                //fs.writeFileSync(jsonFilePath, JSON.stringify(allKeys, null, 2), 'utf8');
                                 keysArray = allKeys;
                             }
 
