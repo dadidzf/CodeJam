@@ -103,7 +103,7 @@ let generateBmfonts = function (dir) {
                             });
 
                             // 创建临时文件
-                            const tempDir = path.join(outputDir, 'temp');
+                            const tempDir = path.join(dir, 'temp');
                             if (!fs.existsSync(tempDir)) {
                                 fs.mkdirSync(tempDir);
                             }
@@ -130,7 +130,7 @@ let generateBmfonts = function (dir) {
                             console.error(`处理 ${projectFileName} 时出错:`, error);
                         }
                     } else {
-                        console.log(`对应的 .GlyphProject 文件 ${projectFileName} 不存在`);
+                        console.log(`${projectFileName}对应的 .GlyphProject 文件  不存在`);
                     }
                 }
             });
@@ -208,7 +208,7 @@ let generateTTFs = function (dir) {
                             console.error(`处理 ${ttfFileName} 时出错:`, error);
                         }
                     } else {
-                        console.log(`对应的 .ttf 文件 ${ttfFileName} 不存在`);
+                        console.log(`对应的${ttfFileName}.ttf 文件  不存在`);
                     }
                 }
             });
