@@ -62,13 +62,9 @@ function readTranslations(baseDir) {
     return translations;
 }
 
-// 调用函数读取翻译数据
-const translations = readTranslations(path.join(dir, 'configs/jsons'));
-console.log('不同语言的翻译数据:', translations);
-
-let generateBmfonts = function (dir) {
+let generateBmfonts = function (dir, langDir, langName) {
     const ttfDir = path.join(dir, 'configs/bmfont');
-    const outputDir = path.join(dir, 'output');
+    const outputDir = path.join(langDir, 'fonts');
 
     // 创建输出目录
     if (!fs.existsSync(outputDir)) {
@@ -93,19 +89,21 @@ let generateBmfonts = function (dir) {
                             const keysArray = JSON.parse(jsonContent);
 
                             // 从 translations 中提取文本内容
+                            let translations = readTranslations(langDir);
                             let textContent = '';
                             keysArray.forEach(key => {
                                 Object.values(translations).forEach(langData => {
                                     if (langData[key]) {
                                         textContent += langData[key];
                                     }
-                                });
-                            });
+                                })
+                            })
+
 
                             // 创建临时文件
-                            const tempDir = path.join(dir, 'temp');
+                            const tempDir = path.join(dir, 'temp', langName);
                             if (!fs.existsSync(tempDir)) {
-                                fs.mkdirSync(tempDir);
+                                fs.mkdirSync(tempDir, { recursive: true });
                             }
                             const tempFilePath = path.join(tempDir, `${projectFileName.replace('.GlyphProject', '')}_temp.txt`);
                             fs.writeFileSync(tempFilePath, textContent, 'utf8');
@@ -115,7 +113,7 @@ let generateBmfonts = function (dir) {
                             const command = `"${path.join('/Applications/Glyph Designer.app/Contents/MacOS/Glyph Designer')}" \
 "${projectFileName}" \
 "${outputFontRelativePath}" \
--inf "${tempFileRelativePath}"`;
+-inf ${tempFileRelativePath}`;
                             const options = {
                                 cwd: dir
                             };
@@ -125,7 +123,7 @@ let generateBmfonts = function (dir) {
                             console.log(`成功为 ${projectFileName} 生成字体文件`);
 
                             // 删除临时文件
-                            fs.unlinkSync(tempFilePath);
+                            //fs.unlinkSync(tempFilePath);
                         } catch (error) {
                             console.error(`处理 ${projectFileName} 时出错:`, error);
                         }
@@ -134,6 +132,8 @@ let generateBmfonts = function (dir) {
                     }
                 }
             });
+
+            //processFntFiles(outputDir);
         } catch (error) {
             console.error(`读取 ${ttfDir} 目录时出错:`, error);
         }
@@ -142,8 +142,20 @@ let generateBmfonts = function (dir) {
     }
 };
 
-// 调用函数生成字体文件
-generateBmfonts(dir);
+let generateBmFontsForAllLang = function (dir) {
+    const files = fs.readdirSync(path.join(dir, 'configs/jsons/Lang'));
+    files.forEach(file => {
+        const filePath = path.join(dir, 'configs/jsons/Lang', file);
+        const stats = fs.statSync(filePath);
+
+        if (stats.isDirectory() && file !== "HI") {
+            generateBmfonts(dir, path.join(dir, 'configs/jsons/Lang', file), file);
+        } else {
+        }
+    });
+}
+
+generateBmFontsForAllLang(dir);
 
 let generateTTFs = function (dir) {
     const ttfDir = path.join(dir, 'configs/ttf');
@@ -171,6 +183,7 @@ let generateTTFs = function (dir) {
                             let keysArray = JSON.parse(jsonContent);
 
                             let allKeys = new Set();
+                            let translations = readTranslations(path.join(dir, 'configs/jsons'));
                             Object.values(translations).forEach(langData => {
                                 Object.keys(langData).forEach(key => allKeys.add(key));
                             });
@@ -221,4 +234,62 @@ let generateTTFs = function (dir) {
 };
 
 // 调用函数生成字体文件
-generateTTFs(dir); 
+generateTTFs(dir);
+
+// 新函数，处理 .fnt 文件
+function processFntFiles(outputFontRelativePath) {
+    // 检查目录是否存在
+    if (!fs.existsSync(outputFontRelativePath)) {
+        console.warn(`目录 ${outputFontRelativePath} 不存在`);
+        return;
+    }
+
+    // 读取目录下所有文件
+    const files = fs.readdirSync(outputFontRelativePath);
+    files.forEach(file => {
+        if (file.endsWith('.fnt')) {
+            const filePath = path.join(outputFontRelativePath, file);
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            const lines = fileContent.split('\n');
+
+            const deletedLines = [];
+            let charIdCount = 0;
+            const newLines = [];
+
+            // 第一遍遍历，删除 letter 长度大于 1 的行并统计 char id= 开头的行数
+            lines.forEach(line => {
+                if (line.startsWith('char id=')) {
+                    const letterMatch = line.match(/letter="(.*?)"/);
+                    if (letterMatch && letterMatch[1].length > 1 && letterMatch[1] !== 'space') {
+                        deletedLines.push(line);
+                    } else {
+                        newLines.push(line);
+                        charIdCount++;
+                    }
+                } else {
+                    newLines.push(line);
+                }
+            });
+
+            // 第二遍遍历，修改 chars count= 行
+            const finalLines = newLines.map(line => {
+                if (line.startsWith('chars count=')) {
+                    return `chars count=${charIdCount}`;
+                }
+                return line;
+            });
+
+            // 打印删除的行
+            if (deletedLines.length > 0) {
+                console.log(`文件 ${file} 中删除的行：`);
+                deletedLines.forEach(deletedLine => {
+                    console.log(deletedLine);
+                });
+            }
+
+            // 覆盖原文件
+            const newFileContent = finalLines.join('\n');
+            fs.writeFileSync(filePath, newFileContent, 'utf8');
+        }
+    });
+}
