@@ -1,10 +1,10 @@
 let MAX_PLAY_TIMES = 1000; // 一个数组最多测试多少次
 
 let LEVEL_MAP_CONFIGS = [
-    // 行     列      文件名         开局最少对子数      开局最多对子数      起始过关率            每个难度过关率步进  每个难度关卡数    难度级别总数
-    { row: 8, col: 6, file: "easy", init_min_pairs: 2, init_max_pairs: 8, win_rate_start: 100, win_rate_step: 5, step_levels: 500, diff_cnt: 10 },
-    { row: 10, col: 8, file: "medium", init_min_pairs: 2, init_max_pairs: 12, win_rate_start: 90, win_rate_step: 5, step_levels: 250, diff_cnt: 10 },
-    { row: 12, col: 10, file: "hard", init_min_pairs: 3, init_max_pairs: 16, win_rate_start: 80, win_rate_step: 5, step_levels: 250, diff_cnt: 10 },
+    // 行      列        文件名         开局最少对子数      最小对子递减数    多少关减一次    开局最多对子数        起始过关率            每个难度过关率步进     每个难度关卡数    难度级别总数   
+    { row: 8, col: 6, file: "easy", min_pairs_start: 6, pairs_dec: 1, levels_to_dec: 2, init_max_pairs: 8, win_rate_start: 100, win_rate_step: 5, step_levels: 500, diff_cnt: 10 },
+    { row: 10, col: 8, file: "medium", min_pairs_start: 9, pairs_dec: 2, levels_to_dec: 3, init_max_pairs: 13, win_rate_start: 90, win_rate_step: 5, step_levels: 250, diff_cnt: 10 },
+    //{ row: 12, col: 10, file: "hard", min_pairs_start: 12, pairs_dec: 2, levels_to_dec: 2, init_max_pairs: 20, win_rate_start: 80, win_rate_step: 5, step_levels: 2, diff_cnt: 10 },
 ]
 
 
@@ -411,24 +411,15 @@ let applyAnswer = function (boardArr, start, dest, dir, mahjongCnt) {
     }
 }
 
-let playOneArr = function (arr, row, col, minPairs, maxPairs) {
+let playOneArr = function (arr, row, col) {
     let boardArr = convertTo2D(arr, col);
     //printBoard(boardArr, row);
-    let answerInfo = findAnswers(boardArr, FIND_ALL_PAIR, false);
+    let answerInfo = findAnswers(boardArr, FIND_ALL_PAIR, true);
     let answers = answerInfo.answers;
-
-    if (answers.length < minPairs || answers.length > maxPairs) {
-        console.log("数组初始配对超出范围", answers.length);
-        return;
-    }
-    else {
-        let answerInfo = findAnswers(boardArr, FIND_ALL_PAIR, true);
-        let answers = answerInfo.answers;
-        for (let answer of answers) {
-            if (answer.dests.length > 1) {
-                console.log("数组初始配对，存在多个相邻的情况！");
-                return;
-            }
+    for (let answer of answers) {
+        if (answer.dests.length > 1) {
+            console.log("数组初始配对，存在多个相邻的情况！");
+            return;
         }
     }
 
@@ -450,7 +441,7 @@ let playOneArr = function (arr, row, col, minPairs, maxPairs) {
             let answers = [];
             clickCnt++;
             // 前几对直接消除相邻的配对
-            if (clickCnt <= minPairs) {
+            if (clickCnt <= 3) {
                 answerInfo = findAnswers(boardArr, RET_IF_FIND_DIRECT_PAIR, false);
                 answers = answerInfo.slideAnswers;
             }
@@ -489,10 +480,17 @@ let playOneArr = function (arr, row, col, minPairs, maxPairs) {
 const fs = require('fs');
 const path = require('path');
 
+let getMinPairs = function (mapConfig, num) {
+    let minPairsStart = mapConfig.min_pairs_start;
+    let levelsToDec = mapConfig.levels_to_dec;
+    let pairsDec = mapConfig.pairs_dec;
+
+    return minPairsStart - Math.floor((num / levelsToDec)) * pairsDec;
+}
+
 let generatePlayDatas = function (mapConfig) {
     let row = mapConfig.row;
     let col = mapConfig.col;
-    let minPairs = mapConfig.init_min_pairs;
     let maxPairs = mapConfig.init_max_pairs;
     let rateStart = mapConfig.win_rate_start;
     let rateStep = mapConfig.win_rate_step;
@@ -507,10 +505,20 @@ let generatePlayDatas = function (mapConfig) {
     while (1) {
         tryTimes++;
         let arr = generateMahjongArr(row, col);
-        let arrInfo = playOneArr(arr, row, col, minPairs, maxPairs);
+        let arrInfo = playOneArr(arr, row, col);
         if (arrInfo) {
             let num = Math.floor((rateStart - arrInfo.rate * 100) / rateStep);
             if (num < 0 || num >= diffCnt) { // 超出范围
+                continue;
+            }
+
+            let boardArr = convertTo2D(arr, col);
+            let answerInfo = findAnswers(boardArr, FIND_ALL_PAIR, false);
+            let answers = answerInfo.answers;
+
+            let minPairs = getMinPairs(mapConfig, num);
+            if (answers.length < minPairs || answers.length > maxPairs) {
+                console.log(`难度级别为${num + 1}数组初始配对超出范围, 当前对子数为${answers.length}`);
                 continue;
             }
 
@@ -672,7 +680,7 @@ let testArrs = function () {
         console.log(`测试行为${mapArrs.row}, 列为${mapArrs.col}的数组`);
         for (var j = 0; j < mapArrs.arrs.length; j++) {
             console.log(`开始测试第${j + 1}个数组`)
-            let arrInfo = playOneArr(mapArrs.arrs[j], mapArrs.row, mapArrs.col, mapArrs.minPairs, mapArrs.maxPairs);
+            let arrInfo = playOneArr(mapArrs.arrs[j], mapArrs.row, mapArrs.col);
             //console.log("测试结果", arrInfo.rate);
         }
     }

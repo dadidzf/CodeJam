@@ -204,6 +204,8 @@ let generateTTFs = function (dir) {
                                 });
                             });
 
+                            fs.writeFileSync(path.join(outputDir, ttfFileName + ".txt"), textContent, 'utf8');
+
                             // 使用 Fontmin 生成字体文件
                             const fontmin = new Fontmin()
                                 .src(ttfFilePath)
