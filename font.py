@@ -77,4 +77,4 @@ def subset_cjk_only(input_font, text_file, output_font):
     print(f"成功生成字体: {output_font}")
     print("注意: 仅裁剪了CJK字符，所有其他字符保持不变")
 
-subset_cjk_only("C:/Users/dengz/Downloads/Noto_Sans-Bold.ttf", "C:/Users/dengz/Downloads/font/Noto_Sans-Bold.txt", "C:/Users/dengz/Downloads/font/oo.ttf")
+subset_cjk_only("C:/Users/dengz/Downloads/fontforge/Noto_Sans-Bold.ttf", "C:/Users/dengz/Downloads/fontforge/Noto_Sans-Bold.txt", "C:/Users/dengz/Downloads/fontforge/output/Noto_Sans-Bold.ttf")
