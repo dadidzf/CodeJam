@@ -57,45 +57,34 @@ def subset_cjk_only(input_font, text_file, output_font):
         # 检查 glyph 是否有 Unicode 编码且值得输出
         if glyph.unicode != -1 and glyph.isWorthOutputting():
             codepoint = glyph.unicode
-            if  (0x0370 <= codepoint <= 0x03FF) or  \
-                (0x0530 <= codepoint <= 0x08FF) or \
-                (0x0980 <= codepoint <= 0x10FF) or \
-                (0x1200<= codepoint <= 0x1CCF) or \
-                (0x1F00 <= codepoint <= 0x1FFF) or \
-                (0x2C80<= codepoint <= 0x2DDF) or \
-                (0x3200<= codepoint <= 0x33FF) or \
-                (0xA000 <= codepoint <= 0xA63F) or \
-                (0xA720<= codepoint <= 0xA7FF) or \
-                (0xA880<= codepoint <= 0xA8DF) or \
-                (0xA900 <= codepoint <= 0xA95F) or \
-                (0xA980 <= codepoint <= 0xAA7F) or \
-                (0xAAE0<= codepoint <= 0xAB2F) or \
-                (0xAB70<= codepoint <= 0xABFF) or \
-                (0xAC00<= codepoint <= 0xD7FF) or \
-                (0xFB50<= codepoint <= 0xFDFF) or \
-                (0x10D00<= codepoint <= 0x1F2FF) or \
-                \
-                (0x4E00 <= codepoint <= 0x9FFF) or \
-                (0x3400 <= codepoint <= 0x4DBF) or \
-                (0x20000 <= codepoint <= 0x2A6DF) or \
-                (0x2A700 <= codepoint <= 0x2B73F) or \
-                (0x2B740 <= codepoint <= 0x2B81F) or \
-                (0x2B820 <= codepoint <= 0x2CEAF) or \
-                (0xF900 <= codepoint <= 0xFAFF) or \
-                (0xFE70 <= codepoint <= 0xFEFF) or \
-                (0x2F800 <= codepoint <= 0x2FA1F):
+            if  (0xA8E0<= codepoint <= 0xA8FF) or  \
+                (0x1CD0<= codepoint <= 0x1CFF) or \
+                (0x0964 <= codepoint <= 0x0965) or \
+                (0x0020<= codepoint <= 0x007F):
+                {
+                    
+                }
+                # 啥都不做
+            else:
                 if (codepoint not in all_used_chars):
                     font.selection.select(("more", 'unicode'), codepoint)
                    
     font.clear()
-    # for glyph in list(font.selection.byGlyphs):  # 创建副本以便安全迭代
-    #     if glyph.unicode not in required_cjk_chars:
-    #         font.removeGlyph(glyph)
+
+    # # 优化轮廓
+    # font.simplify(0.3, ("ignoreslopes", "ignoreextrema"))
+    # font.removeOverlap()
+    # font.canonicalContours()
+    # font.canonicalStart()
+
+    # # 生成精简TTF
+    # font.generate(output_font, 
+    #          flags=("round", "no-flex", "omit-instructions", "short-post"))
     
     # 5. 生成新字体（保留所有OpenType特性）
-    flags = ("opentype", "PfEd-lookups", "dummy-dsig")
+    #flags = ("opentype", "PfEd-lookups", "dummy-dsig")
+    #font.generate(output_font, flags=flags)
     font.generate(output_font)
     print(f"成功生成字体: {output_font}")
-    print("注意: 仅裁剪了CJK字符，所有其他字符保持不变")
 
 subset_cjk_only("C:/Users/dengz/Downloads/fontforge/Noto_Sans-Bold.ttf", "C:/Users/dengz/Downloads/fontforge/Noto_Sans-Bold.txt", "C:/Users/dengz/Downloads/fontforge/output/Noto_Sans-Bold.ttf")
