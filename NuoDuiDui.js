@@ -7,6 +7,13 @@ let LEVEL_MAP_CONFIGS = [
     //{ row: 12, col: 10, file: "hard", min_pairs_start: 12, pairs_dec: 2, levels_to_dec: 2, init_max_pairs: 20, win_rate_start: 80, win_rate_step: 5, step_levels: 2, diff_cnt: 10 },
 ]
 
+let LEVEL_EASY_CONFIGS = [
+    // 行      列        文件名         开局最少对子数      最小对子递减数    多少关减一次    开局最多对子数        起始过关率            每个难度过关率步进     每个难度关卡数    难度级别总数   
+    //{ row: 8, col: 6, file: "easy", min_pairs_start: 6, pairs_dec: 1, levels_to_dec: 2, init_max_pairs: 12, win_rate_start: 100, win_rate_step: 1, step_levels: 3, diff_cnt: 1 },
+    { row: 10, col: 8, file: "medium", min_pairs_start: 9, pairs_dec: 2, levels_to_dec: 3, init_max_pairs: 20, win_rate_start: 100, win_rate_step: 5, step_levels: 3, diff_cnt: 1 },
+    //{ row: 12, col: 10, file: "hard", min_pairs_start: 12, pairs_dec: 2, levels_to_dec: 2, init_max_pairs: 20, win_rate_start: 80, win_rate_step: 5, step_levels: 2, diff_cnt: 10 },
+]
+
 
 let FIND_ANSWER_LOG_MUTE = true;
 // 查找答案算法，打印函数，方便屏蔽
@@ -488,7 +495,7 @@ let getMinPairs = function (mapConfig, num) {
     return minPairsStart - Math.floor((num / levelsToDec)) * pairsDec;
 }
 
-let generatePlayDatas = function (mapConfig) {
+let generatePlayDatas = function (mapConfig, isReplace = false) {
     let row = mapConfig.row;
     let col = mapConfig.col;
     let maxPairs = mapConfig.init_max_pairs;
@@ -556,7 +563,19 @@ let generatePlayDatas = function (mapConfig) {
                 if (!fs.existsSync(dirPath)) {
                     fs.mkdirSync(dirPath); // 使用 { recursive: true } 创建多级目录
                 }
-                fs.writeFileSync(path.join(__dirname, `MahjongConfig/${file}.json`), JSON.stringify(fileInfo), 'utf8');
+
+                if (!isReplace){
+                    fs.writeFileSync(path.join(__dirname, `MahjongConfig/${file}.json`), JSON.stringify(fileInfo), 'utf8');
+                }
+                else{
+                    let str = fs.readFileSync(path.join(__dirname, `MahjongConfig/${file}.json`), 'utf8');
+                    let info = JSON.parse(str);
+                    for (index in fileInfo.levelsMap){
+                        info.levelsMap[index] = fileInfo.levelsMap[index];
+                    }
+                    info.newUserMaxIndex = fileInfo.diffLevels;
+                    fs.writeFileSync(path.join(__dirname, `MahjongConfig/${file}.json`), JSON.stringify(info), 'utf8');
+                }
                 break;
             }
         }
@@ -688,6 +707,10 @@ let testArrs = function () {
 
 //testArrs();
 
-for (let mapConfig of LEVEL_MAP_CONFIGS) {
-    generatePlayDatas(mapConfig);
+// for (let mapConfig of LEVEL_MAP_CONFIGS) {
+//     generatePlayDatas(mapConfig);
+// }
+
+for (let mapConfig of LEVEL_EASY_CONFIGS) {
+    generatePlayDatas(mapConfig, true);
 }
