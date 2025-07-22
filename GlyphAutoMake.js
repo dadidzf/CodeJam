@@ -207,18 +207,29 @@ let generateTTFs = function (dir) {
                             fs.writeFileSync(path.join(outputDir, ttfFileName + ".txt"), textContent, 'utf8');
 
                             // 使用 Fontmin 生成字体文件
-                            const fontmin = new Fontmin()
-                                .src(ttfFilePath)
-                                .use(Fontmin.glyph({ text: textContent }))
-                                .dest(outputDir);
+                            // const fontmin = new Fontmin()
+                            //     .src(ttfFilePath)
+                            //     .use(Fontmin.glyph({ text: textContent }))
+                            //     .dest(outputDir);
 
-                            fontmin.run(function (err, files) {
-                                if (err) {
-                                    console.error(`处理 ${ttfFileName} 时出错:`, err);
-                                } else {
-                                    console.log(`成功为 ${ttfFileName} 生成字体文件`);
-                                }
-                            });
+                            // fontmin.run(function (err, files) {
+                            //     if (err) {
+                            //         console.error(`处理 ${ttfFileName} 时出错:`, err);
+                            //     } else {
+                            //         console.log(`成功为 ${ttfFileName} 生成字体文件`);
+                            //     }
+                            //});
+
+
+                            //  使用pyftsubset 命令来生成字体
+                            const command = `pyftsubset "${ttfFilePath}" --text-file="${path.join(outputDir, ttfFileName + ".txt")}" --output-file="${path.join(outputDir, ttfFileName)}"`;
+                            const options = {
+                                cwd: dir
+                            };
+
+                            console.log(`开始执行命令：${command}`);
+                            execSync(command, options);
+                            console.log(`成功为 ${ttfFileName} 生成字体文件`);
                         } catch (error) {
                             console.error(`处理 ${ttfFileName} 时出错:`, error);
                         }
